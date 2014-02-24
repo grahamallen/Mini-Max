@@ -1,50 +1,30 @@
-;;(define get-next-goal 
-;;  (lambda (point)
-;;    (let* ((lst1 (cons point (adjacento point)))
-;;           (lst0 (randomize lst1))
-;;           (flst (calculate-h-goal lst0))
-;;           (lst (map list flst lst0))) 
-;;      (set! queue '())
-;;      (enqueue lst)
-;;      (set! queue (reverse queue))
-;;      (let ((num (random 10))
-;;            (len (length lst0))
-;;            (best (front)))
-;;         (cond 
-;;           ((= num 0)
-;;               (list-ref lst0 (random len))) 
-;;            (else
-;;               best))))))
-;; 
-;;(define calculate-h-goal
-;;  (lambda (lst)
-;;    (map h-goal lst)))
-
-;;(define h-goal
-;;  (lambda (point)
-;;    (+ (abs (- (car point) (car robot)))
-;;       (abs (- (cadr point) (cadr robot))))))   
-
-;;(define (adjacent-corners block)
-;;    (let ((x (car block))
-;;          (y (cadr block)))
-;;      (append 
-;;        (if (and (< x 1) (< y 1)) '() (list (list (- x 1) (- y 1))))                                      ;top left is in-bounds
-;;        (if (and (< x 1) (>= y (- num-col-row 1))) '() (list (list (- x 1) (+ y 1))))                     ;bottom left is in-bounds
-;;        (if (and (>= x (- num-col-row 1)) (< y 1)) '() (list (list (+ x 1) (- y 1))))                     ;top right is in-bounds
-;;        (if (and (>= x (- num-col-row 1)) (>= y (- num-col-row 1))) '() (list (list (+ x 1) (+ y 1))))))) ;bottom right is in-bounds 
-
-;;(define (adjacent-cornerso block)
-;;    (let* ((adj-lst0 (adjacent-corners block))
-;;           (adj-lst1 (map (lambda (z) (stepo block z)) adj-lst0)))
-;;      (remove-f adj-lst1)))
-
-
-#|--------------------GRAHAM'S SIMPLE STATIC GOAL CODE---------------------|#
-
 (define (get-next-goal point)
-  ;(newline)
-  ;(display "new get-next-goal: ")(display point)(newline)
-  point)
+  (let* ([root (g-mini-max goal robot 0)]
+        [children (cadddr root)]
+        [gkey (car root)])
+    (cadr (assv gkey children))))
 
-#|------------------END GRAHAM'S SIMPLE STATIC GOAL CODE-------------------|#
+(define (g-dist-pt-abs pta ptb) (+ (abs (- (cadr pta) (cadr ptb))) (abs (- (car pta) (car ptb)))))
+
+(define (g-static-eval rn gn)
+  (- (+ (* 1 (g-dist-pt-abs rn gn)))))
+
+(define (g-secant-components a b)
+  (let ([dx (- (car a) (car b))]
+        [dy (- (cadr a) (cadr b))])
+    (list dx dy)))
+
+(define g-critical-depth 5)
+
+(define (g-get-key-node node)
+  (car node))
+
+(define (g-mini-max rn gn depth)
+  (if (< depth (- g-critical-depth 1))
+    (if (even? depth)
+      (let ([children (map (lambda (pt) (g-mini-max pt gn (+ depth 1))) (append (adjacentv rn) (list rn)))])
+          (list (apply min (map g-get-key-node children)) rn gn children))
+      (let ([children (map (lambda (pt) (g-mini-max rn pt (+ depth 1))) (append (adjacento gn) (list gn)))])
+          (list (apply max (map g-get-key-node children)) rn gn children)))
+    ;else, deepest depth
+    (list (g-static-eval rn gn) rn gn '())))

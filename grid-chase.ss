@@ -27,8 +27,7 @@
     (search2 grid 1 stop-count))
 
 (define (search2 grid count stop-count)
-    (display "Count: ")(display count)
-    (newline)
+    ;(display "Count: ")(display count)(newline)
     (cond 
       ((equal? robot goal)
         (display "Robot attains the goal"))
@@ -38,8 +37,8 @@
       (else
         (pause pause-num)
         (search-robot grid)
-        (display robot)
-        (newline)
+        ;(display robot)
+        ;(newline)
         (if (null? robot)                                    ;if robot is enclosed by obstacles and couldn't ever reach goal
           (display "Cannot reach the goal")
           (begin
@@ -49,7 +48,7 @@
 
 (define (search-robot grid)
     (let ((next-robot (get-next-robot robot)))
-      (draw-path-node (car robot) (cadr robot))
+      ;(draw-path-node (car robot) (cadr robot))
       (set! robot next-robot)
       (if (not (null? robot))
         (draw-moved-robotx robot))))
